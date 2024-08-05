@@ -1,17 +1,16 @@
-import { OPTIONS_TODOS } from '../constans';
+import { OptionsTodos } from '../constans';
 import { Todo } from '../types/Todo';
 
-export const getTodosByOptions = (option: string, todos: Todo[]) => {
+export const getTodosByOptions = (option: OptionsTodos, todos: Todo[]) => {
   switch (option) {
-    case OPTIONS_TODOS.COMPLETED:
+    case OptionsTodos.COMPLETED:
       return todos.filter(todo => todo.completed);
 
-    case OPTIONS_TODOS.ACTIVE:
+    case OptionsTodos.ACTIVE:
       return todos.filter(todo => !todo.completed);
-
-    default:
-      return todos;
   }
+
+  return todos;
 };
 
 export const getTodos = {
@@ -31,9 +30,12 @@ export const getToggleAll = (todos: Todo[]) => {
   const filterTodos = todos.filter(todo => !todo.completed);
 
   const changeTodos = (newTodos: Todo[], completed: boolean) =>
-    newTodos.map(({ id, userId, title }) => {
-      return { id, userId, title, completed: completed };
-    });
+    newTodos.map(({ id, userId, title }) => ({
+      id,
+      userId,
+      title,
+      completed: completed,
+    }));
 
   switch (true) {
     case getTodos.isEveryCompleted(todos):
@@ -41,8 +43,7 @@ export const getToggleAll = (todos: Todo[]) => {
 
     case getTodos.isEveryNotCompleted(todos):
       return changeTodos(todos, true);
-
-    default:
-      return changeTodos(filterTodos, true);
   }
+
+  return changeTodos(filterTodos, true);
 };

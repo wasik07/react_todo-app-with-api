@@ -1,40 +1,35 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import React, { memo } from 'react';
+import { memo, useContext, useMemo } from 'react';
 import cn from 'classnames';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
-import { TodoFormUpdate } from '../TodoFormUpdate';
-import { Todo } from '../../types/Todo';
+import { TodoFormUpdate } from './TodoFormUpdate';
+import { TodosContext } from '../store/TodosContext';
+import { getTodosByOptions } from '../utils/todoUtils';
 
-interface Props {
-  todos: Todo[];
-  onSelectTodo: (todo: Todo | null) => void;
-  selectedTodo: Todo | null;
-  tempTodo: Todo | null;
-  onDelete: (id: number[]) => void;
-  loading: boolean;
-  deletedTodosId: number[] | null;
-  onUpdate(todos: Todo[]): Promise<PromiseSettledResult<void>[]>;
-  updatedTodos: Todo[] | null;
-  titleField: React.RefObject<HTMLInputElement>;
-}
+export const TodoList = memo(function TodoListComponent() {
+  const {
+    option,
+    todos,
+    setSelectedTodo,
+    selectedTodo,
+    tempTodo,
+    deletedTodos,
+    loading,
+    deletedTodosId,
+    updateTodos,
+    updatedTodos,
+  } = useContext(TodosContext);
 
-export const TodoList: React.FC<Props> = memo(function TodoListComponent({
-  todos,
-  onSelectTodo,
-  selectedTodo,
-  tempTodo,
-  onDelete,
-  loading,
-  deletedTodosId,
-  onUpdate,
-  updatedTodos,
-  titleField,
-}) {
+  const todosByOption = useMemo(
+    () => getTodosByOptions(option, todos),
+    [option, todos],
+  );
+
   return (
     <section className="todoapp__main" data-cy="TodoList">
       <TransitionGroup>
-        {todos.map(todo => (
+        {todosByOption.map(todo => (
           <CSSTransition key={todo.id} timeout={300} classNames="item">
             <div
               data-cy="Todo"
@@ -50,26 +45,19 @@ export const TodoList: React.FC<Props> = memo(function TodoListComponent({
                   className="todo__status"
                   checked={todo.completed}
                   onClick={() =>
-                    onUpdate([{ ...todo, completed: !todo.completed }])
+                    updateTodos([{ ...todo, completed: !todo.completed }])
                   }
                 />
               </label>
 
               {todo.id === selectedTodo?.id ? (
-                <TodoFormUpdate
-                  key={selectedTodo.id}
-                  todoUpdate={selectedTodo}
-                  onUpdate={onUpdate}
-                  onSelectTodo={onSelectTodo}
-                  onDelete={onDelete}
-                  titleField={titleField}
-                />
+                <TodoFormUpdate key={selectedTodo.id} />
               ) : (
                 <>
                   <span
                     data-cy="TodoTitle"
                     className="todo__title"
-                    onDoubleClick={() => onSelectTodo(todo)}
+                    onDoubleClick={() => setSelectedTodo(todo)}
                   >
                     {todo.title}
                   </span>
@@ -78,7 +66,7 @@ export const TodoList: React.FC<Props> = memo(function TodoListComponent({
                     type="button"
                     className="todo__remove"
                     data-cy="TodoDelete"
-                    onClick={() => onDelete([todo.id])}
+                    onClick={() => deletedTodos([todo.id])}
                   >
                     ×
                   </button>

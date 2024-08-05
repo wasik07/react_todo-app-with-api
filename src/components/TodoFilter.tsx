@@ -1,24 +1,15 @@
-import React, { memo, useMemo } from 'react';
+import { memo, useContext, useMemo } from 'react';
 import cn from 'classnames';
 
-import { OPTIONS_TODOS } from '../../constans';
-import { getTodos } from '../../services/todos';
-import { Todo } from '../../types/Todo';
+import { OptionsTodos } from '../constans';
+import { TodosContext } from '../store/TodosContext';
+import { getTodos } from '../utils/todoUtils';
 
-interface Props {
-  todos: Todo[];
-  option: string;
-  onOption: (option: string) => void;
-  onDelete: (todosId: number[]) => void;
-}
+export const TodoFilter = memo(function TodoFilterComponent() {
+  const { todos, deletedTodos, option, setOption } = useContext(TodosContext);
 
-export const TodoFilter: React.FC<Props> = memo(function TodoFilterComponent({
-  todos,
-  option,
-  onOption,
-  onDelete,
-}) {
   const activeTodos = useMemo(() => getTodos.active(todos), [todos]);
+
   const IsOneCompletedTodo = useMemo(
     () => getTodos.isOneCompleted(todos),
     [todos],
@@ -39,10 +30,10 @@ export const TodoFilter: React.FC<Props> = memo(function TodoFilterComponent({
         <a
           href="#/"
           className={cn('filter__link', {
-            selected: option === OPTIONS_TODOS.ALL,
+            selected: option === OptionsTodos.ALL,
           })}
           data-cy="FilterLinkAll"
-          onClick={() => onOption(OPTIONS_TODOS.ALL)}
+          onClick={() => setOption(OptionsTodos.ALL)}
         >
           All
         </a>
@@ -50,10 +41,10 @@ export const TodoFilter: React.FC<Props> = memo(function TodoFilterComponent({
         <a
           href="#/active"
           className={cn('filter__link', {
-            selected: option === OPTIONS_TODOS.ACTIVE,
+            selected: option === OptionsTodos.ACTIVE,
           })}
           data-cy="FilterLinkActive"
-          onClick={() => onOption(OPTIONS_TODOS.ACTIVE)}
+          onClick={() => setOption(OptionsTodos.ACTIVE)}
         >
           Active
         </a>
@@ -61,10 +52,10 @@ export const TodoFilter: React.FC<Props> = memo(function TodoFilterComponent({
         <a
           href="#/completed"
           className={cn('filter__link', {
-            selected: option === OPTIONS_TODOS.COMPLETED,
+            selected: option === OptionsTodos.COMPLETED,
           })}
           data-cy="FilterLinkCompleted"
-          onClick={() => onOption(OPTIONS_TODOS.COMPLETED)}
+          onClick={() => setOption(OptionsTodos.COMPLETED)}
         >
           Completed
         </a>
@@ -74,7 +65,7 @@ export const TodoFilter: React.FC<Props> = memo(function TodoFilterComponent({
         className="todoapp__clear-completed"
         data-cy="ClearCompletedButton"
         disabled={!IsOneCompletedTodo}
-        onClick={() => onDelete(allCompletedTodoId)}
+        onClick={() => deletedTodos(allCompletedTodoId)}
       >
         Clear completed
       </button>

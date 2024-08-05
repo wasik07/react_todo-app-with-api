@@ -1,28 +1,14 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useContext, useState } from 'react';
 
-import { USER_ID } from '../../constans';
-import { Todo } from '../../types/Todo';
+import { USER_ID } from '../constans';
+import { TodosContext } from '../store/TodosContext';
+import { Todo } from '../types/Todo';
 
-interface Props {
-  addTodo: (todo: Todo) => Promise<void>;
-  newError: (error: string) => void;
-  onTempTodo: (todo: Todo) => void;
-  onLoading: (completed: boolean) => void;
-  loading: boolean;
-  titleField: React.RefObject<HTMLInputElement>;
-}
+export const TodoForm = memo(function TodoFormComponent() {
+  const { newError, setTempTodo, loading, setLoading, titleField, addTodo } =
+    useContext(TodosContext);
 
-export const TodoForm: React.FC<Props> = memo(function TodoFormComponent({
-  addTodo,
-  newError,
-  onTempTodo,
-  loading,
-  onLoading,
-  titleField,
-}) {
   const [title, setTitle] = useState('');
-
-  const reset = () => setTitle('');
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -31,12 +17,12 @@ export const TodoForm: React.FC<Props> = memo(function TodoFormComponent({
 
     if (!normalizeTitle) {
       newError('Title should not be empty');
-      onLoading(false);
+      setLoading(false);
 
       return;
     }
 
-    onLoading(true);
+    setLoading(true);
 
     const id = 0;
 
@@ -47,11 +33,11 @@ export const TodoForm: React.FC<Props> = memo(function TodoFormComponent({
       title: normalizeTitle,
     };
 
-    onTempTodo(todo);
+    setTempTodo(todo);
 
     addTodo(todo)
-      .then(reset)
-      .finally(() => onLoading(false));
+      .then(() => setTitle(''))
+      .finally(() => setLoading(false));
   };
 
   return (
